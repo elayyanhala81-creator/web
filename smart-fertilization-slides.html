@@ -1,0 +1,719 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Smart Fertilization Assistant – Web Slides</title>
+
+  <style>
+    :root{
+      --bg0:#06120b;
+      --bg1:#0b1f12;
+      --card:#0f2a18cc;
+      --card2:#0c2314cc;
+      --accent:#b8f35a;
+      --accent2:#41d67a;
+      --text:#e9f6ee;
+      --muted:#b9d7c5;
+      --line:#1d4c2f;
+      --shadow: 0 18px 55px rgba(0,0,0,.55);
+    }
+
+    *{box-sizing:border-box}
+    html,body{height:100%; margin:0}
+    body{
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      color: var(--text);
+      overflow:hidden;
+      background:
+        radial-gradient(1200px 800px at 20% 30%, rgba(65,214,122,.20), transparent 55%),
+        radial-gradient(900px 700px at 85% 25%, rgba(184,243,90,.16), transparent 60%),
+        radial-gradient(1000px 800px at 70% 85%, rgba(65,214,122,.14), transparent 55%),
+        linear-gradient(180deg, var(--bg0), var(--bg1));
+    }
+
+    /* subtle “leaf” texture */
+    .leaf-layer{
+      position: fixed; inset: 0;
+      background-image:
+        radial-gradient(circle at 10% 20%, rgba(184,243,90,.08) 0 2px, transparent 3px),
+        radial-gradient(circle at 25% 80%, rgba(65,214,122,.07) 0 2px, transparent 3px),
+        radial-gradient(circle at 80% 30%, rgba(184,243,90,.06) 0 2px, transparent 3px),
+        radial-gradient(circle at 90% 75%, rgba(65,214,122,.06) 0 2px, transparent 3px);
+      background-size: 180px 180px;
+      opacity: .6;
+      pointer-events: none;
+      filter: blur(.2px);
+    }
+
+    .wrap{
+      height:100%;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      padding: 48px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .deck{
+      width:min(1100px, 95vw);
+      height:min(650px, 80vh);
+      border: 1px solid rgba(184,243,90,.18);
+      border-radius: 22px;
+      background: linear-gradient(145deg, rgba(15,42,24,.78), rgba(8,24,14,.70));
+      box-shadow: var(--shadow);
+      position: relative;
+      overflow:hidden;
+    }
+
+    .topbar{
+      position:absolute; left:0; right:0; top:0;
+      padding: 16px 22px;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap: 14px;
+      border-bottom: 1px solid rgba(184,243,90,.12);
+      background: linear-gradient(180deg, rgba(0,0,0,.20), rgba(0,0,0,0));
+      backdrop-filter: blur(8px);
+    }
+
+    .brand{
+      display:flex; align-items:center; gap: 10px;
+      font-weight: 650;
+      letter-spacing: .2px;
+      color: var(--muted);
+      font-size: 14px;
+      user-select:none;
+    }
+    .dot{
+      width:10px; height:10px; border-radius: 50%;
+      background: radial-gradient(circle at 30% 30%, var(--accent), var(--accent2));
+      box-shadow: 0 0 18px rgba(184,243,90,.35);
+    }
+
+    .meta{
+      display:flex; align-items:center; gap: 14px;
+      color: var(--muted);
+      font-size: 13px;
+      user-select:none;
+    }
+
+    .progress{
+      width: 220px;
+      height: 8px;
+      border-radius: 999px;
+      background: rgba(255,255,255,.08);
+      overflow:hidden;
+      border: 1px solid rgba(255,255,255,.06);
+    }
+    .bar{
+      height:100%;
+      width:0%;
+      background: linear-gradient(90deg, var(--accent2), var(--accent));
+      box-shadow: 0 0 18px rgba(65,214,122,.28);
+      transition: width .25s ease;
+    }
+
+    .slide{
+      height:100%;
+      padding: 90px 70px 70px;
+      display:none;
+      animation: fadeIn .25s ease;
+    }
+    .slide.active{display:block}
+
+    @keyframes fadeIn{
+      from{opacity:0; transform: translateY(8px)}
+      to{opacity:1; transform: translateY(0)}
+    }
+
+    /* title styles */
+    .kicker{
+      display:inline-flex;
+      align-items:center;
+      gap:10px;
+      color: var(--muted);
+      font-weight: 600;
+      letter-spacing: .3px;
+      font-size: 14px;
+      text-transform: uppercase;
+      margin-bottom: 14px;
+    }
+    .kicker .leaf{
+      font-size: 18px;
+      filter: drop-shadow(0 0 10px rgba(184,243,90,.25));
+    }
+
+    h1{
+      margin: 0 0 18px;
+      font-size: clamp(38px, 4.3vw, 58px);
+      line-height: 1.05;
+      letter-spacing: .2px;
+      color: var(--text);
+    }
+
+    .subtitle{
+      margin: 0 0 26px;
+      font-size: 18px;
+      color: var(--muted);
+      max-width: 900px;
+    }
+
+    .cue{
+      margin-top: 18px;
+      display:grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 18px;
+    }
+
+    .card{
+      border: 1px solid rgba(184,243,90,.14);
+      background: linear-gradient(180deg, rgba(11,31,18,.55), rgba(11,31,18,.22));
+      border-radius: 18px;
+      padding: 18px 18px 16px;
+      box-shadow: 0 12px 30px rgba(0,0,0,.25);
+    }
+
+    .card h3{
+      margin: 0 0 10px;
+      font-size: 14px;
+      color: var(--accent);
+      letter-spacing: .25px;
+      text-transform: uppercase;
+    }
+
+    ul{
+      margin: 0;
+      padding-left: 18px;
+      color: var(--text);
+      font-size: 18px;
+      line-height: 1.55;
+    }
+    li{margin-bottom: 10px}
+    li:last-child{margin-bottom: 0}
+
+    .controls{
+      position:absolute;
+      left: 18px;
+      bottom: 16px;
+      display:flex;
+      gap: 10px;
+      align-items:center;
+    }
+    .btn{
+      border: 1px solid rgba(184,243,90,.18);
+      background: rgba(0,0,0,.25);
+      color: var(--text);
+      padding: 10px 12px;
+      border-radius: 14px;
+      cursor:pointer;
+      user-select:none;
+      transition: transform .1s ease, background .2s ease;
+      font-size: 14px;
+    }
+    .btn:hover{background: rgba(0,0,0,.35)}
+    .btn:active{transform: scale(.98)}
+
+    .hint{
+      position:absolute;
+      right: 18px;
+      bottom: 18px;
+      color: rgba(233,246,238,.65);
+      font-size: 12px;
+      user-select:none;
+    }
+
+    /* title-only slide (Slide 1) */
+    .hero{
+      display:flex;
+      flex-direction:column;
+      justify-content:center;
+      height:100%;
+    }
+    .hero h1{
+      font-size: clamp(44px, 5.4vw, 78px);
+      margin-bottom: 14px;
+    }
+    .hero .subtitle{
+      font-size: 20px;
+      max-width: 860px;
+    }
+
+    @media (max-width: 820px){
+      .deck{height: 86vh}
+      .slide{padding: 88px 20px 60px}
+      .cue{grid-template-columns: 1fr}
+      .progress{display:none}
+    }
+  </style>
+</head>
+
+<body>
+  <div class="leaf-layer"></div>
+
+  <div class="wrap">
+    <div class="deck" id="deck">
+
+      <div class="topbar">
+        <div class="brand">
+          <span class="dot"></span>
+          <span>Smart Fertilization Assistant • Web Slides</span>
+        </div>
+
+        <div class="meta">
+          <div class="progress" aria-hidden="true"><div class="bar" id="bar"></div></div>
+          <span id="counter">1 / 15</span>
+        </div>
+      </div>
+
+      <!-- Slide 1 -->
+      <section class="slide active">
+        <div class="hero">
+          <div class="kicker"><span class="leaf">🌿</span> Project</div>
+          <h1>Smart Fertilization Assistant</h1>
+          <p class="subtitle">
+            A simple, data-driven way to recommend the right fertilizer type and amount for cucumber crops.
+          </p>
+
+          <div class="cue">
+            <div class="card">
+              <h3>Say (quick)</h3>
+              <ul>
+                <li>We help farmers stop guessing fertilization.</li>
+                <li>We use soil values + growth stage.</li>
+                <li>Output: fertilizer type + exact amount.</li>
+              </ul>
+            </div>
+            <div class="card">
+              <h3>Remember</h3>
+              <ul>
+                <li>Focus crop: Cucumber.</li>
+                <li>Prototype: simulation now, sensors later.</li>
+                <li>AI: regression for amount + logic/classification for type.</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Slide 2 -->
+      <section class="slide">
+        <div class="kicker"><span class="leaf">🍃</span> The Problem</div>
+        <h1>Why Fertilization Is Often Guesswork</h1>
+        <p class="subtitle">Farmers often fertilize without knowing what the soil actually needs.</p>
+
+        <div class="cue">
+          <div class="card">
+            <h3>What happens</h3>
+            <ul>
+              <li>No soil testing before fertilizing</li>
+              <li>Wrong type or wrong amount</li>
+              <li>Decisions based on habits</li>
+            </ul>
+          </div>
+          <div class="card">
+            <h3>Results</h3>
+            <ul>
+              <li>Fertilizer waste + higher cost</li>
+              <li>Soil degradation over time</li>
+              <li>Lower yield and crop quality</li>
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      <!-- Slide 3 -->
+      <section class="slide">
+        <div class="kicker"><span class="leaf">🌱</span> Why Soil Matters</div>
+        <h1>Understanding N, P, and K</h1>
+        <p class="subtitle">Plants need the right balance of nutrients to grow and produce healthy crops.</p>
+
+        <div class="cue">
+          <div class="card">
+            <h3>Key nutrients</h3>
+            <ul>
+              <li>N: growth and leaves</li>
+              <li>P: roots and early development</li>
+              <li>K: fruits and quality</li>
+            </ul>
+          </div>
+          <div class="card">
+            <h3>Main idea</h3>
+            <ul>
+              <li>Different stages need different levels</li>
+              <li>Soil may be low in one nutrient</li>
+              <li>So fertilizer must match the deficiency</li>
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      <!-- Slide 4 -->
+      <section class="slide">
+        <div class="kicker"><span class="leaf">🌿</span> Our Goal</div>
+        <h1>Turning Guesswork into Smart Decisions</h1>
+        <p class="subtitle">A simple tool that gives clear recommendations, not complicated lab reports.</p>
+
+        <div class="cue">
+          <div class="card">
+            <h3>We want</h3>
+            <ul>
+              <li>Correct fertilizer type</li>
+              <li>Exact amount (numbers)</li>
+              <li>Easy explanation for farmers</li>
+            </ul>
+          </div>
+          <div class="card">
+            <h3>So we reduce</h3>
+            <ul>
+              <li>Over-fertilization</li>
+              <li>Under-fertilization</li>
+              <li>Cost and environmental impact</li>
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      <!-- Slide 5 -->
+      <section class="slide">
+        <div class="kicker"><span class="leaf">🍀</span> The Idea</div>
+        <h1>How Our System Works (High-Level)</h1>
+        <p class="subtitle">Input → analysis → recommendation (type + amount).</p>
+
+        <div class="cue">
+          <div class="card">
+            <h3>Inputs</h3>
+            <ul>
+              <li>Growth stage</li>
+              <li>Soil N, P, K values</li>
+              <li>Optional: pH</li>
+            </ul>
+          </div>
+          <div class="card">
+            <h3>Outputs</h3>
+            <ul>
+              <li>Deficiency summary (what’s missing)</li>
+              <li>Recommended fertilizer type</li>
+              <li>Recommended amount (g/dunum/day)</li>
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      <!-- Slide 6 -->
+      <section class="slide">
+        <div class="kicker"><span class="leaf">🌱</span> Data Inputs</div>
+        <h1>What Information Do We Use?</h1>
+        <p class="subtitle">Prototype uses simulated sensor values (entered manually).</p>
+
+        <div class="cue">
+          <div class="card">
+            <h3>We read</h3>
+            <ul>
+              <li>Soil N, P, K (numbers)</li>
+              <li>Growth stage (0/1/2)</li>
+              <li>pH (optional)</li>
+            </ul>
+          </div>
+          <div class="card">
+            <h3>Why simulation?</h3>
+            <ul>
+              <li>No sensors in this phase</li>
+              <li>Still realistic for testing</li>
+              <li>Easy to connect sensors later</li>
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      <!-- Slide 7 -->
+      <section class="slide">
+        <div class="kicker"><span class="leaf">🍃</span> Growth Stages</div>
+        <h1>Why Plant Stage Changes Everything</h1>
+        <p class="subtitle">Cucumber needs different nutrients as it grows.</p>
+
+        <div class="cue">
+          <div class="card">
+            <h3>Stages</h3>
+            <ul>
+              <li>Stage 0: seedling (0–14 days)</li>
+              <li>Stage 1: growth (14–35 days)</li>
+              <li>Stage 2: production (35+ days)</li>
+            </ul>
+          </div>
+          <div class="card">
+            <h3>Key point</h3>
+            <ul>
+              <li>Need values (N/P/K) change per stage</li>
+              <li>So recommendation must change too</li>
+              <li>No “one fertilizer fits all”</li>
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      <!-- Slide 8 -->
+      <section class="slide">
+        <div class="kicker"><span class="leaf">🌿</span> Artificial Intelligence</div>
+        <h1>Where AI Makes the Difference</h1>
+        <p class="subtitle">AI helps us estimate the right amount instead of using one rigid rule.</p>
+
+        <div class="cue">
+          <div class="card">
+            <h3>Regression (amount)</h3>
+            <ul>
+              <li>Inputs: stage + soil values</li>
+              <li>Output: numeric amount</li>
+              <li>More flexible than one formula</li>
+            </ul>
+          </div>
+          <div class="card">
+            <h3>Type selection</h3>
+            <ul>
+              <li>Pick fertilizer based on most critical deficiency</li>
+              <li>Explain decision in simple words</li>
+              <li>Can be upgraded to ML classification</li>
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      <!-- Slide 9 -->
+      <section class="slide">
+        <div class="kicker"><span class="leaf">🍀</span> Fertilizer Quantity</div>
+        <h1>How We Calculate the Exact Amount</h1>
+        <p class="subtitle">We use a weighted approach instead of only the biggest deficiency.</p>
+
+        <div class="cue">
+          <div class="card">
+            <h3>Steps</h3>
+            <ul>
+              <li>Compute deficiencies: defN, defP, defK</li>
+              <li>Apply weights by stage importance</li>
+              <li>Output a single amount number</li>
+            </ul>
+          </div>
+          <div class="card">
+            <h3>Why weighted?</h3>
+            <ul>
+              <li>Uses all nutrient shortages</li>
+              <li>More realistic than “max only”</li>
+              <li>Improves stability of recommendations</li>
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      <!-- Slide 10 -->
+      <section class="slide">
+        <div class="kicker"><span class="leaf">🌱</span> Fertilizer Type</div>
+        <h1>Choosing the Right Fertilizer</h1>
+        <p class="subtitle">Type depends on which nutrient is most missing.</p>
+
+        <div class="cue">
+          <div class="card">
+            <h3>Simple mapping</h3>
+            <ul>
+              <li>K deficit → Potash-based fertilizer</li>
+              <li>N deficit → Ammonium-based fertilizer</li>
+              <li>P deficit → MAP (phosphorus)</li>
+            </ul>
+          </div>
+          <div class="card">
+            <h3>Balanced option</h3>
+            <ul>
+              <li>If multiple deficits → 20-20-20</li>
+              <li>Always show a short reason</li>
+              <li>Farmer-friendly output</li>
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      <!-- Slide 11 -->
+      <section class="slide">
+        <div class="kicker"><span class="leaf">🍃</span> Simulation & Demo</div>
+        <h1>From Input to Recommendation</h1>
+        <p class="subtitle">A live demo where users enter values and see instant results.</p>
+
+        <div class="cue">
+          <div class="card">
+            <h3>Demo flow</h3>
+            <ul>
+              <li>Select stage</li>
+              <li>Enter soil N/P/K</li>
+              <li>Click “Calculate”</li>
+            </ul>
+          </div>
+          <div class="card">
+            <h3>Outputs shown</h3>
+            <ul>
+              <li>Deficiencies (N/P/K)</li>
+              <li>Fertilizer type</li>
+              <li>Exact amount number</li>
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      <!-- Slide 12 -->
+      <section class="slide">
+        <div class="kicker"><span class="leaf">🌿</span> Real-Life Example</div>
+        <h1>A Simple Walkthrough</h1>
+        <p class="subtitle">Show one case from start to finish.</p>
+
+        <div class="cue">
+          <div class="card">
+            <h3>Inputs (example)</h3>
+            <ul>
+              <li>Stage 1 (14–35 days)</li>
+              <li>Soil: N=210, P=150, K=260</li>
+              <li>pH optional</li>
+            </ul>
+          </div>
+          <div class="card">
+            <h3>Outputs</h3>
+            <ul>
+              <li>Largest deficit: K</li>
+              <li>Type: Potash fertilizer</li>
+              <li>Amount: numeric recommendation</li>
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      <!-- Slide 13 -->
+      <section class="slide">
+        <div class="kicker"><span class="leaf">🍀</span> Impact</div>
+        <h1>Why This Matters for Farmers and the Environment</h1>
+        <p class="subtitle">Better decisions = less waste and healthier soil.</p>
+
+        <div class="cue">
+          <div class="card">
+            <h3>For farmers</h3>
+            <ul>
+              <li>Lower fertilizer cost</li>
+              <li>Higher yield & quality</li>
+              <li>Clear, simple guidance</li>
+            </ul>
+          </div>
+          <div class="card">
+            <h3>For sustainability</h3>
+            <ul>
+              <li>Less chemical waste</li>
+              <li>Better soil health long-term</li>
+              <li>Reduced water pollution risk</li>
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      <!-- Slide 14 -->
+      <section class="slide">
+        <div class="kicker"><span class="leaf">🌱</span> Future Development</div>
+        <h1>From Simulation to Real Sensors</h1>
+        <p class="subtitle">Next steps to make it real in the field.</p>
+
+        <div class="cue">
+          <div class="card">
+            <h3>Upgrades</h3>
+            <ul>
+              <li>Connect IoT sensors for soil readings</li>
+              <li>Add more crops beyond cucumber</li>
+              <li>Improve model with real farm data</li>
+            </ul>
+          </div>
+          <div class="card">
+            <h3>Deployment</h3>
+            <ul>
+              <li>Mobile-friendly interface</li>
+              <li>Farmer dashboard</li>
+              <li>Advisory reports over time</li>
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      <!-- Slide 15 -->
+      <section class="slide">
+        <div class="kicker"><span class="leaf">🍃</span> Conclusion</div>
+        <h1>Smarter Fertilization, Better Harvests</h1>
+        <p class="subtitle">A simple tool to replace guessing with data-driven recommendations.</p>
+
+        <div class="cue">
+          <div class="card">
+            <h3>What we delivered</h3>
+            <ul>
+              <li>Prototype simulation</li>
+              <li>AI-based amount estimation</li>
+              <li>Clear fertilizer type selection</li>
+            </ul>
+          </div>
+          <div class="card">
+            <h3>Takeaway</h3>
+            <ul>
+              <li>Less waste</li>
+              <li>Better soil health</li>
+              <li>Better crop outcomes</li>
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      <!-- Controls -->
+      <div class="controls">
+        <button class="btn" id="prevBtn">← Prev</button>
+        <button class="btn" id="nextBtn">Next →</button>
+        <button class="btn" id="fsBtn">⛶ Fullscreen</button>
+      </div>
+
+      <div class="hint">Use ← → keys • Press F11 for full screen</div>
+    </div>
+  </div>
+
+  <script>
+    const slides = Array.from(document.querySelectorAll(".slide"));
+    const counter = document.getElementById("counter");
+    const bar = document.getElementById("bar");
+    const prevBtn = document.getElementById("prevBtn");
+    const nextBtn = document.getElementById("nextBtn");
+    const fsBtn = document.getElementById("fsBtn");
+
+    let i = 0;
+
+    function updateUI(){
+      slides.forEach((s, idx) => s.classList.toggle("active", idx === i));
+      counter.textContent = `${i + 1} / ${slides.length}`;
+      bar.style.width = `${((i + 1) / slides.length) * 100}%`;
+    }
+
+    function next(){
+      if(i < slides.length - 1){ i++; updateUI(); }
+    }
+    function prev(){
+      if(i > 0){ i--; updateUI(); }
+    }
+
+    document.addEventListener("keydown", (e) => {
+      if(e.key === "ArrowRight") next();
+      if(e.key === "ArrowLeft") prev();
+    });
+
+    prevBtn.addEventListener("click", prev);
+    nextBtn.addEventListener("click", next);
+
+    fsBtn.addEventListener("click", async () => {
+      const deck = document.getElementById("deck");
+      if (!document.fullscreenElement) {
+        await deck.requestFullscreen().catch(()=>{});
+      } else {
+        await document.exitFullscreen().catch(()=>{});
+      }
+    });
+
+    updateUI();
+  </script>
+</body>
+</html>
